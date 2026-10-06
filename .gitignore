@@ -1,5 +1,9 @@
 # Personal data stays local — never commit topics.json or TOPIC_MAP.md
-# (they contain your conversation excerpts). Only templates ship in this repo.
+# (they contain your conversation excerpts). Only code, prompts, templates,
+# and schema ship in this repo.
 topics.json
 TOPIC_MAP.md
+digests/
+__pycache__/
+*.pyc
 .DS_Store

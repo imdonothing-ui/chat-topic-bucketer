@@ -1,56 +1,78 @@
 # Chat Topic Bucketer
 
-You chat with Muse in one window. This tool watches the conversation, figures out the topic of each turn, and files it into a living index. Later, say **"topic map"** to see every thread, or **"open the \<topic\>"** to spin that thread off into its own side chat with a full digest — no more scrolling back to find where topic A went.
+You chat with an AI assistant in one window. This tool watches the conversation,
+figures out the topic of each turn, and files it into a living index. Later,
+pull up the **topic map** to see every thread, or **open a topic** to continue
+it with full context — no more scrolling back to find where topic A went.
 
-## How it works
+## Two engines, one index
 
-1. A scheduled watcher (every ~15 minutes) scans your **main chat and all side chats** for new turns.
-2. It classifies each turn: attaches continuations to existing topics, creates a new topic only for genuinely new subjects. One subject is one topic **even across chats** — if a thread continues in a different chat, its turns join the same topic. Short acknowledgments ("ok", "thanks") attach to the surrounding topic.
-3. It maintains two files:
-   - `topics.json` — machine-readable index (per-chat watermarks, topics, turn references with chat IDs, excerpts).
-   - `TOPIC_MAP.md` — human-readable table, grouped by chat, you can skim anytime.
-4. On demand, your assistant materializes any topic as a side chat pre-loaded with a digest, so you can continue there with full context. If the topic already lives in a single side chat, it just points you there instead of duplicating it.
+| | **Muse adapter** (`adapters/muse/`) | **Portable core** (`core/`, `cli.py`) |
+|---|---|---|
+| Works with | Muse | Any assistant (ChatGPT, Claude, …) |
+| Classifier | The scheduled agent itself | Any OpenAI-compatible LLM |
+| API key | None needed | `BUCKETER_API_KEY` |
+| Scheduler | Muse cron (15 min) | Your own cron, or manual runs |
+| "Open topic" | Real side chat via `chat.create` | Digest markdown you paste anywhere |
+| Deps | — | None (stdlib only, Python 3.9+) |
 
-## Requirements
+Both read and write the same `topics.json` (see `topics-schema.json`), so you
+can mix them — e.g. bucket an exported ChatGPT history with the core, then
+keep watching live chats with the Muse adapter.
 
-- [Muse](https://muse.ai) (or any compatible agent runtime) with access to:
-  - `chat.list` / `chat.read_messages` / `chat.create` / `chat.send_message`
-  - `cron.add` (scheduled agent tasks)
-- That's it — no API keys, no extra services, no cost beyond the watcher's own agent runs.
+## Quickstart
 
-## Setup (5 minutes, just talk to your assistant)
+**On Muse** (no key needed) — see `adapters/muse/SETUP.md`. In short, tell
+your assistant:
 
-**1. Create the workspace and seed the index.** Say:
+> Set up the chat topic bucketer from https://github.com/YOUR-USERNAME/chat-topic-bucketer
+> using the Muse adapter.
 
-> Set up the chat topic bucketer from https://github.com/YOUR-USERNAME/chat-topic-bucketer. Create `~/workspace/chat-topics/`, list my chats with `chat.list`, seed `topics.json` (following `topics-schema.json`, with a watermark per chat) from recent turns in each chat, and generate `TOPIC_MAP.md` grouped by chat.
+Then use it by chatting: **"topic map"** lists topics; **"open the \<topic\>"**
+materializes (or points to) a side chat with a digest.
 
-**2. Install the watcher.** Say:
+**Anywhere else** — see `adapters/generic/BRING_YOUR_OWN_TRANSCRIPT.md`:
 
-> Create a cron called `chat-topic-watcher` that runs every 15 minutes using the body in `watcher-prompt.md`. It should stay silent — the index files are the product.
+```bash
+export BUCKETER_API_KEY="..."   # any OpenAI-compatible key
+python3 cli.py --index mychats/topics.json add --turns turns.jsonl
+python3 cli.py --index mychats/topics.json map
+python3 cli.py --index mychats/topics.json digest t-sourdough --out digests/sourdough.md
+```
 
-**3. Use it.**
-- **"topic map"** — lists topics grouped by chat, with one-line summaries.
-- **"open the \<topic\>"** — if the topic already lives in one side chat, I'll point you there; otherwise I create a side chat named after the topic and post a digest (summary + key exchanges, condensed). The original turns stay where they are.
+Turns are plain JSONL (`turn_id, chat_id, chat_name, seq, ts, user, assistant`);
+one subject stays one topic even across chats. To "open" a topic, paste its
+digest at the start of a new conversation.
 
 ## What's in this repo
 
-| File | Purpose |
+| Path | Purpose |
 |---|---|
-| `watcher-prompt.md` | The scheduled job's instructions (fill in `<MAIN_CHAT_ID>`) |
-| `topics-schema.json` | JSON Schema for `topics.json` |
+| `core/` | Portable classifier + index + digest rendering (zero dependencies) |
+| `cli.py` | `add` / `map` / `digest` / `topics` commands over the core |
+| `tests/test_pipeline.py` | End-to-end test with a stubbed classifier (no key needed) |
+| `adapters/muse/` | Watcher prompt + setup for the zero-key Muse path |
+| `adapters/generic/` | Bring-your-own-transcript guide for any other assistant |
+| `topics-schema.json` | JSON Schema shared by both engines |
 | `topic-map-template.md` | Starting template for `TOPIC_MAP.md` |
-| `README.md` | This file |
 
 ## Privacy
 
-Your `topics.json` contains your conversation excerpts and **never leaves your machine** — it's local working state, not part of this repo. Only the templates and prompts are published here.
+Your `topics.json` holds conversation excerpts and **never leaves your machine**
+— it's local working state, gitignored here. Only code, prompts, and templates
+are published.
 
 ## Limitations (honest)
 
-- **Polling, not real-time.** New turns appear in the index within ~15 minutes of the watcher run.
-- **Transcripts are immutable.** "Opening" a topic creates a side chat with a faithful digest, not the original messages moved over.
-- **Classification is heuristic.** It occasionally files a turn under the wrong topic; the index is easy to fix by hand.
-- **Active chats only.** Archived chats aren't watched (their history can be backfilled on request).
+- **Classification is heuristic.** The model occasionally misfiles a turn; the
+  index is plain JSON and easy to fix by hand.
+- **"Open topic" fidelity varies.** On Muse it's a real side chat with a digest;
+  elsewhere it's a digest file you paste — transcripts can't be moved, only
+  recapped.
+- **Polling, not real-time.** The watcher/index refreshes on a schedule (or
+  whenever you run `add`).
+- **"Topic map" / "open the \<topic\>" are conventions**, not enforced commands —
+  they work because the adapter setup teaches your assistant to honor them.
 
 ## License
 
