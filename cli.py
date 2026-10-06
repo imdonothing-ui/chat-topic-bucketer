@@ -6,9 +6,12 @@ Turn JSONL schema (one JSON object per line):
    "ts": "2026-10-06T14:00:00-07:00", "user": "...", "assistant": "..."}
 
 Configuration via environment:
-  BUCKETER_API_KEY   LLM API key (required unless --mock-json)
-  BUCKETER_API_BASE  OpenAI-compatible base URL (default https://api.openai.com/v1)
-  BUCKETER_MODEL     Model name (default gpt-4o-mini)
+  BUCKETER_PROVIDER      openai (default) or anthropic
+  BUCKETER_API_KEY       OpenAI-compatible API key (required unless --mock-json)
+  BUCKETER_API_BASE      OpenAI-compatible base URL (default https://api.openai.com/v1)
+  BUCKETER_ANTHROPIC_KEY Anthropic API key (when provider=anthropic)
+  BUCKETER_MODEL         Model name (default gpt-4o-mini for openai;
+                         required for anthropic — pick a Haiku-class model)
 
 Commands:
   add      classify new turns from a JSONL file into the index
@@ -25,7 +28,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import classify, digest, index as idxmod
-from core.llm import LLMError, OpenAICompatClient, StubClient
+from core.llm import LLMError, StubClient, make_client
 
 
 def load_turns(path):
@@ -54,7 +57,7 @@ def cmd_add(args):
             client = StubClient(f.read())
     else:
         try:
-            client = OpenAICompatClient()
+            client = make_client(args.provider)
         except LLMError as exc:
             raise SystemExit(str(exc))
     try:
@@ -116,6 +119,12 @@ def main():
     p_add = sub.add_parser("add", help="classify new turns from a JSONL file")
     p_add.add_argument("--turns", required=True, help="JSONL file of turns")
     p_add.add_argument("--mock-json", default=None, help="canned classifier JSON (testing)")
+    p_add.add_argument(
+        "--provider",
+        default=None,
+        choices=["openai", "anthropic"],
+        help="LLM provider (default: $BUCKETER_PROVIDER or openai)",
+    )
     p_add.set_defaults(fn=cmd_add)
 
     p_map = sub.add_parser("map", help="print the topic map")

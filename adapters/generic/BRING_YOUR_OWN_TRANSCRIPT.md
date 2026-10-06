@@ -32,6 +32,20 @@ export BUCKETER_API_KEY="..."        # any OpenAI-compatible key
 # optional: BUCKETER_API_BASE, BUCKETER_MODEL (default: OpenAI, gpt-4o-mini)
 
 python3 cli.py --index ~/mychats/topics.json add --turns turns.jsonl
+```
+
+Or with Claude doing the classifying (native Anthropic support, no proxy):
+
+```bash
+export BUCKETER_ANTHROPIC_KEY="..."  # from console.anthropic.com
+export BUCKETER_MODEL="..."          # a Claude model ID — Haiku-class is plenty
+
+python3 cli.py --index ~/mychats/topics.json add --turns turns.jsonl --provider anthropic
+```
+
+Then, either way:
+
+```bash
 python3 cli.py --index ~/mychats/topics.json map        # the topic map
 python3 cli.py --index ~/mychats/topics.json topics     # list topics
 python3 cli.py --index ~/mychats/topics.json digest t-sourdough --out digests/sourdough.md

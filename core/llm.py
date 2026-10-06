@@ -64,3 +64,61 @@ class StubClient:
 
     def complete(self, system, user):
         return self.canned_text
+
+
+class AnthropicClient:
+    """Native Anthropic Messages API client (no proxy needed)."""
+
+    API_URL = "https://api.anthropic.com/v1/messages"
+
+    def __init__(self, api_key=None, model=None):
+        self.api_key = api_key or os.environ.get("BUCKETER_ANTHROPIC_KEY", "")
+        self.model = model or os.environ.get("BUCKETER_MODEL", "")
+        if not self.api_key:
+            raise LLMError("No Anthropic key. Set BUCKETER_ANTHROPIC_KEY.")
+        if not self.model:
+            raise LLMError(
+                "No model. Set BUCKETER_MODEL to a Claude model ID "
+                "(see console.anthropic.com/docs/models — a Haiku-class "
+                "model is plenty for classification)."
+            )
+
+    def complete(self, system, user):
+        body = json.dumps(
+            {
+                "model": self.model,
+                "max_tokens": 2000,
+                "system": system,
+                "messages": [{"role": "user", "content": user}],
+            }
+        ).encode("utf-8")
+        req = urllib.request.Request(
+            self.API_URL,
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": self.api_key,
+                "anthropic-version": "2023-06-01",
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=90) as resp:
+                data = json.load(resp)
+        except Exception as exc:
+            raise LLMError("Anthropic request failed: %s" % exc)
+        try:
+            return "".join(
+                b.get("text", "") for b in data["content"] if b.get("type") == "text"
+            )
+        except (KeyError, TypeError):
+            raise LLMError("Unexpected Anthropic response shape")
+
+
+def make_client(provider=None):
+    """Factory: 'openai' (default) or 'anthropic'."""
+    provider = provider or os.environ.get("BUCKETER_PROVIDER", "openai")
+    if provider == "anthropic":
+        return AnthropicClient()
+    if provider == "openai":
+        return OpenAICompatClient()
+    raise LLMError("Unknown provider %r (use 'openai' or 'anthropic')" % (provider,))
