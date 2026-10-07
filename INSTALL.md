@@ -10,7 +10,7 @@ The skill teaches the agent the whole workflow: trigger phrases
 (no API key needed), and the scripts that keep the JSON valid.
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/chat-topic-bucketer ~/chat-topic-bucketer
+git clone https://github.com/imdonothing-ui/chat-topic-bucketer ~/chat-topic-bucketer
 mkdir -p ~/.claude/skills
 cp -r ~/chat-topic-bucketer/skills/chat-topic-bucketer ~/.claude/skills/
 ```
@@ -49,7 +49,7 @@ Available tools: `topic_map`, `list_topics`, `apply_classified_turns`,
 ## 3. CLI (generic — works anywhere Python runs)
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/chat-topic-bucketer
+git clone https://github.com/imdonothing-ui/chat-topic-bucketer
 cd chat-topic-bucketer && pip install .
 bucketer --help
 ```

@@ -8,7 +8,7 @@ it with full context — no more scrolling back to find where topic A went.
 ## Install (pick one)
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/chat-topic-bucketer
+git clone https://github.com/imdonothing-ui/chat-topic-bucketer
 ```
 
 - **Claude Code / skill-compatible agents:** copy `skills/chat-topic-bucketer/`
@@ -43,7 +43,7 @@ keep watching live chats with the Muse adapter.
 **On Muse** (no key needed) — see `adapters/muse/SETUP.md`. In short, tell
 your assistant:
 
-> Set up the chat topic bucketer from https://github.com/YOUR-USERNAME/chat-topic-bucketer
+> Set up the chat topic bucketer from https://github.com/imdonothing-ui/chat-topic-bucketer
 > using the Muse adapter.
 
 Then use it by chatting: **"topic map"** lists topics; **"open the \<topic\>"**

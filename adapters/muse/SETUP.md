@@ -8,7 +8,7 @@ so no LLM API key is needed. The watcher is a scheduled agent task; the
 
 **1. Create the workspace and seed the index.** Say to your assistant:
 
-> Set up the chat topic bucketer from https://github.com/YOUR-USERNAME/chat-topic-bucketer
+> Set up the chat topic bucketer from https://github.com/imdonothing-ui/chat-topic-bucketer
 > using the Muse adapter. Create `~/workspace/chat-topics/`, list my chats with
 > `chat.list`, seed `topics.json` (following `topics-schema.json`, one watermark
 > per chat) from recent turns in each chat, and generate `TOPIC_MAP.md` grouped
