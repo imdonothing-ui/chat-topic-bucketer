@@ -75,6 +75,27 @@ def cmd_add(args):
     )
 
 
+def cmd_apply(args):
+    """Apply agent-classified turns (no LLM call): the agent did the classifying."""
+    idx = idxmod.load(args.index)
+    turns = load_turns(args.turns)
+    with open(args.result, encoding="utf-8") as f:
+        result = json.load(f)
+    fresh = idxmod.new_turns(idx, turns)
+    if not fresh:
+        print("No new turns since last watermark.")
+        return
+    idxmod.apply(idx, {t["turn_id"]: t for t in fresh}, result)
+    idxmod.save(args.index, idx)
+    map_path = os.path.join(os.path.dirname(os.path.abspath(args.index)), "TOPIC_MAP.md")
+    with open(map_path, "w", encoding="utf-8") as f:
+        f.write(digest.render_map(idx))
+    print(
+        "Applied %d turn(s) into %d topic(s). Map written to %s"
+        % (len(fresh), len(idx["topics"]), map_path)
+    )
+
+
 def find_topic(idx, needle):
     needle = needle.lower()
     exact = [t for t in idx["topics"] if t["id"] == needle]
@@ -126,6 +147,18 @@ def main():
         help="LLM provider (default: $BUCKETER_PROVIDER or openai)",
     )
     p_add.set_defaults(fn=cmd_add)
+
+    p_apply = sub.add_parser(
+        "apply",
+        help="apply agent-classified turns from a JSON result file (no LLM call)",
+    )
+    p_apply.add_argument("--turns", required=True, help="JSONL file of turns")
+    p_apply.add_argument(
+        "--result",
+        required=True,
+        help='JSON file with {"assignments": [...], "summaries": {...}}',
+    )
+    p_apply.set_defaults(fn=cmd_apply)
 
     p_map = sub.add_parser("map", help="print the topic map")
     p_map.set_defaults(fn=cmd_map)

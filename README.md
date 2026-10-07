@@ -5,6 +5,24 @@ figures out the topic of each turn, and files it into a living index. Later,
 pull up the **topic map** to see every thread, or **open a topic** to continue
 it with full context — no more scrolling back to find where topic A went.
 
+## Install (pick one)
+
+```bash
+git clone https://github.com/YOUR-USERNAME/chat-topic-bucketer
+```
+
+- **Claude Code / skill-compatible agents:** copy `skills/chat-topic-bucketer/`
+  into the agent's skills folder (e.g. `~/.claude/skills/`), open a fresh
+  session, say **"topic map"**. The agent classifies with its own judgment —
+  no API key needed.
+- **Any MCP-capable agent:** `pip install "chat-topic-bucketer[mcp]"`, add
+  `mcp/example-config.json` to the agent's MCP config. Tools: `topic_map`,
+  `list_topics`, `apply_classified_turns`, `topic_digest`.
+- **Anywhere else:** `pip install .` → `bucketer` CLI (`apply`/`add`/`map`/
+  `digest`/`topics`).
+
+Full details: [INSTALL.md](INSTALL.md).
+
 ## Two engines, one index
 
 | | **Muse adapter** (`adapters/muse/`) | **Portable core** (`core/`, `cli.py`) |
@@ -48,8 +66,10 @@ digest at the start of a new conversation.
 
 | Path | Purpose |
 |---|---|
+| `skills/chat-topic-bucketer/` | Installable Agent Skill (Claude Code, Cursor, …) |
+| `mcp/server.py` | MCP server: topic tools for any MCP-capable agent |
 | `core/` | Portable classifier + index + digest rendering (zero dependencies) |
-| `cli.py` | `add` / `map` / `digest` / `topics` commands over the core |
+| `cli.py` | `add` / `apply` / `map` / `digest` / `topics` commands over the core |
 | `tests/test_pipeline.py` | End-to-end test with a stubbed classifier (no key needed) |
 | `adapters/muse/` | Watcher prompt + setup for the zero-key Muse path |
 | `adapters/generic/` | Bring-your-own-transcript guide for any other assistant |

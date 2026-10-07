@@ -1,0 +1,1 @@
+{"mcpServers":{"chat-topic-bucketer":{"args":["/absolute/path/to/chat-topic-bucketer/mcp/server.py"],"command":"python3","env":{"BUCKETER_INDEX":"/absolute/path/to/topics.json"}}}}
