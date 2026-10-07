@@ -1,9 +1,43 @@
-# Chat Topic Bucketer
+# Chat Topic Bucketer — a topic map + resumable digests for your AI chats
 
-You chat with an AI assistant in one window. This tool watches the conversation,
-figures out the topic of each turn, and files it into a living index. Later,
-pull up the **topic map** to see every thread, or **open a topic** to continue
-it with full context — no more scrolling back to find where topic A went.
+Never lose a thread again. This tool watches your conversations with an AI
+assistant (Claude Code, ChatGPT, Muse, …), figures out the topic of each
+turn, and files it into a living index. Later, pull up the **topic map** to
+see every thread, or **open a topic** to continue it with full context —
+no more scrolling back to find where topic A went.
+
+Built for anyone who has thought *"what was that thing I asked about last
+month?"* — people find this tool by searching for: **claude code
+conversation history**, **resume chat**, **chat history search**, **continue
+an old conversation**, **long chat management**, **organize AI conversations**.
+
+## Demo (example session)
+
+```text
+> topic map
+
+# Topic map — all chats
+
+## Main chat
+| Topic                              | Last active | Turns | Summary                                  |
+| Splunk AI Foundations HM prep      | 2026-10-05  | 14    | data-moat framing, MiniMax H3 exhibit    |
+| Sourdough starter troubleshooting  | 2026-10-03  | 12    | feeding schedule, hooch vs. discard      |
+
+## Side chat — Interview prep
+| Topic                              | Last active | Turns | Summary                                  |
+| Meta PM evals: "describe a time…"  | 2026-09-29  | 8     | verify-every-claim status-report loop    |
+
+> open the sourdough
+
+# Sourdough starter troubleshooting
+12 turns across 2 chats, last active 2026-10-03.
+[digest renders here — paste it at the top of a new chat to continue]
+_Mapped with chat-topic-bucketer._
+```
+
+On Muse the same flow ends in a real side chat with the digest loaded;
+anywhere else, it's a digest file you paste — transcripts can't be moved,
+only recapped.
 
 ## Install (pick one)
 
@@ -75,6 +109,22 @@ digest at the start of a new conversation.
 | `adapters/generic/` | Bring-your-own-transcript guide for any other assistant |
 | `topics-schema.json` | JSON Schema shared by both engines |
 | `topic-map-template.md` | Starting template for `TOPIC_MAP.md` |
+| `server.json` | MCP registry listing (official `registry` format) — publish the
+  package to PyPI, then submit this file's repo to the MCP registry |
+
+## Registry & discovery
+
+- `server.json` at the repo root declares this server to the official MCP
+  registry (repo: `imdonothing-ui/chat-topic-bucketer`, package:
+  `chat-topic-bucketer` 0.2.0, stdio transport). Two steps remain before it
+  can be listed: publish the package to PyPI
+  (`python3 -m build && python3 -m twine upload dist/*`), then open a PR
+  adding the server to the registry.
+- Suggested repo tagline for GitHub settings (settings page only, can't be
+  set from code): *"topic map + resumable digests for Claude Code chats —
+  find any conversation thread, continue it with full context"*
+- Suggested repo topics/tags: `claude-code`, `mcp-server`, `agent-skill`,
+  `conversation-history`, `chatgpt`, `productivity`
 
 ## Privacy
 

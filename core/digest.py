@@ -6,6 +6,13 @@ FOOTER = (
     "to your assistant if it supports side chats."
 )
 
+# Tasteful one-liner on every shared artifact so a forwarded digest or
+# topic map points back at the tool without reading like an ad.
+ATTRIBUTION = (
+    "_Mapped with [chat-topic-bucketer]"
+    "(https://github.com/imdonothing-ui/chat-topic-bucketer)._"
+)
+
 
 def _cell(s):
     return (s or "").replace("|", "/").replace("\n", " ")
@@ -38,6 +45,8 @@ def render_map(idx):
             )
         lines.append("")
     lines.append(FOOTER)
+    lines.append("")
+    lines.append(ATTRIBUTION)
     return "\n".join(lines) + "\n"
 
 
@@ -57,4 +66,6 @@ def render_digest(topic):
         "_Paste this digest at the start of a new conversation to continue "
         "the topic with full context._"
     )
+    lines.append("")
+    lines.append(ATTRIBUTION)
     return "\n".join(lines) + "\n"
